@@ -3,6 +3,7 @@ from transformers import BartForConditionalGeneration, BartTokenizer
 import torch
 from PyPDF2 import PdfReader
 import io
+import uvicorn
 
 app = FastAPI()
 
@@ -11,7 +12,8 @@ model_name = "siddheshtv/bart-multi-lexsum"
 model = BartForConditionalGeneration.from_pretrained(model_name)
 tokenizer = BartTokenizer.from_pretrained(model_name)
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#'cuda' if torch.cuda.is_available() else 
+device = torch.device('cpu')
 model = model.to(device)
 
 def generate_summary(text, max_length=512):
@@ -49,3 +51,6 @@ async def summarize_pdf(file: UploadFile = File(...)):
     text = extract_text_from_pdf(contents)
     summary = generate_summary(text)
     return {"summary": summary}
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
